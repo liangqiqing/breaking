@@ -1,0 +1,196 @@
+ ##今日内容：
+	
+	1.HTTP协议：响应消息
+	2.Respons对象	
+	3.ServletContext对象
+	
+
+	## HTTP协议：
+		1.请求消息：客户端发送给服务器端的数据
+			* 数据格式：
+				1.请求行
+				2.请求头
+				3.请求空行
+				4.请求体
+		2.响应消息：服务器端给客户端发送数据
+			*数据格式：
+				1.响应行
+					1.组成：协议/版本 响应状态码 状态码描述
+					2.响应状态码：服务器告诉客户端浏览器本次请求和响应的一个状态
+						1.状态码都是3位数字
+						2.分类
+							1. 1xx：服务器就接收客户端消息，当没有接收完成的，等待一段时间后，发送1xx状态码
+							2. 2xx：成功。代表 200  200 < > 300 的取值都是成功
+							3. 3xx：重定向。代表：302(重定向)，304(访问缓存)
+							4. 4xx：客户端错误
+								* 代表
+									* 404：(请求路径没有对应的资源)
+									* 405：请求方式没有对应的doxxx方法
+							5. 5xx：服务器错误。代表：505(服务器内部出现异常)
+				2.响应头：
+					1.格式 :头名称：值
+					2.常见的响应头：
+						1.Content-Type：服务器购书客户端本次响应体数据格式一级编码格式
+						2.Content-disposition：服务器告诉客户端以什么格式打开响应数据体
+							* 值：
+								* in-line默认值，在当前页面内打开
+								* attachment;filename=xxx;一附件形式打开响应体。多用于文件下载
+				3.响应空行
+				4.响应体：传输的数据
+				
+		*响应字符串格式：
+			HTTP/1.1 200 
+			Content-Type: text/html;charset=UTF-8
+			Content-Length: 165
+			Date: Sat, 09 May 2020 02:24:56 GMT
+			Keep-Alive: timeout=20
+			Connection: keep-alive
+			
+			
+			<html>
+			  <head>
+				<title>$Title$</title>
+			  </head>
+			  <body>
+			  <font color="#ffc0cb" size="150px"><i><b>欢迎来到tomcat世界</b></i></font>
+			  </body>
+			</html>
+
+
+ ##Respons对象：
+	* 功能：设置响应消息
+		1.设置响应行
+			1.格式： HTTP/1.1  200 ok
+			2.设置状态码：    void setStatus(int sc)  
+		2.设置响应头：void setHeader(String name, long date)
+		3.设置响应体：
+			*  使用步骤：
+				1.获取输出流：
+				* getOutputStream()  字节输出流
+				*  getWriter()  字符输出流
+				2.使用输出流，将数据输出到客户端浏览器
+				
+				
+	* 案例：
+		1. 完成重定向：
+			* 重订向：资源跳转的方式
+			* 代码实现：
+			  /* //设置状态码
+				response.setStatus(302);
+				//设置响应头
+				response.setHeader("location","/day15/responseDome02");*/
+
+				//简化设置响应头代码书写代码
+				response.sendRedirect("/day15/responseDome02");
+				
+			* 重定向的特点：
+				1.重定向地址栏路径会发生变化
+				2.重定向可以访问其他服务器的项目
+				3.重定向是两次请求，不能使用request对象共享数据
+			* 资源转发的特点：
+				1.转发地址栏路径不会发生变化
+				2.转发只能访问当前的服务器项目
+				3.转发是一次请求，可以使用request共享数据
+			
+			* 路径写法：
+				1.路径分类：
+					1.相对路径
+						* 如：./index.html
+						* 不以 / 开头，以 . 开头路径
+						
+						* 规则：找到当前资源和目标资源之间的相对位置关系
+							* ./ ：当前目录
+							* ../ ：后退一级目录
+					2.绝对路径：通过绝对路径可以确定唯一资源
+						* 如： http://localhost/day15/responseDome02   /day15/responseDome02
+						* 以 / 开头的路径
+						
+						* 规则：判断定义的路径是给谁用的？判断请求来自哪里？
+							* 给客户端浏览器使用：需要加虚拟目录(项目的访问路径)
+								* 建议虚拟目录动态获取：request.getContextPath();
+							* 给服务器使用：不需要加虚拟目录
+		2.服务器输出字符数据浏览器
+			* 步骤：
+				1.获取字母输出流
+				2.输出数据
+				
+			* 注意：
+				* 乱码问题：
+					1.PrintWriter writer = response.getWriter(); 默认是获取流是拉丁编码 ISO-8859-1
+					2.设置该留的默认编码
+					3.告诉响应体使用的编码
+					
+				//简单的形式，设置编码，在获取流之前设置	
+				 response.setContentType("text/html;charset=utf-8");
+		3.服务器字节输出数据浏览器
+			* 步骤：
+				1.获取字母输出流
+				2.输出数据
+		
+		4.验证码
+			* 本质：图片
+			* 目的：防止恶意注册表单
+			
+	
+	##.ServletContext对象
+		1.概念; 代表整个web应用，可以和程序的容器(服务器)来通讯
+			* 获取对象：
+			1. request.getServletContext();
+			2. this.getServletContext();
+		2.功能：
+			1.获取MIME类型：
+				* MIME类型：在互联网通信过程中定义的一种文件数据类型
+					* 格式： 大类型/小类型 如 text/html  image/jpeg
+						
+					* 获取： String getMimeType(String file)	
+					
+			2.域对象：共享数据
+				1. setAttrinute(Strung name , Object obj)
+				2. getAttribute(String name)
+				3. removeAttribute(String name)
+				
+				* ServletContext对象范围：所有用户请求的数据
+				
+			3.获取文件的真实(服务器)路径
+				* 方法：
+					* String getRealPath(String path);
+					
+					如：
+						//获取ServletContext对象
+						ServletContext context = this.getServletContext();
+						//获取src下的a.txt文件
+						String a = context.getRealPath("/WEB-INF/ClassS/a.txt");
+						System.out.println(a);
+						//获取WEB-INF下的c.txt
+						String c = context.getRealPath("/WEB-INF/c.txt");
+						System.out.println(c);
+						//获取web下的b.txt文件
+						String b = context.getRealPath("/b.txt");
+						System.out.println(b);
+					
+					
+	## 文件下载案例
+		* 需求
+		1. 页面显示超链接
+		2. 点击超链接后弹出框框提示
+		3. 完成图片文件下载
+		
+		* 分析：
+		1. 超链接执行的资源如果能够给浏览器解析，则在浏览器中展示，如果不能，则唐初下载提示框。不满足需求
+		2. 任何资源都必须提昂出下载提示框
+		3. 使用响应头设置资源的打开方式
+			* content-disposition:attachment;filename=xxx
+			
+		* 步骤：
+		1. 定义页面，编辑超链接href属性，执行Servlet，传递组员名称filename=xxx
+		2. 定义servlet
+			1. 获取文件名称
+			2. 使用字节输入刘加载文件进内存
+			3. 指定response的响应头：content-disposition：attachment；filename=xxx
+			4.将数据写出到response输出流
+			
+		##问题：
+			* 中文文件名乱码问题
+				* 解决思路：
+					1.获取客户端使用浏览器版本信息
+					2.根据不同版本信息，设置filename的编码方式不同

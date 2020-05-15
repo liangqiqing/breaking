@@ -1,0 +1,11 @@
+
+1.tomcat服务器会根据请求url中的资源路径，创建对应的ServletDEMO的对象。
+
+2.tomcat服务器，会创建request对象和response对象，request对象中封装请求消息数据。
+
+3.tomcat将request和response两个对象传递个service方法，并调用service方法。
+
+4.程序员(我们)，可以通过request对象来获取请求消息数据，通过response对象设置响应消息数据。
+
+5.服务器在浏览器做出效应之前，
+会从response对象中拿出程序员设置的响应消息数据。

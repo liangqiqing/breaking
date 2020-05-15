@@ -1,0 +1,206 @@
+
+ ##今日内容
+	1. 会话技术
+		1.Cookie
+		2.Session
+	2.JSP：入门学习		
+	
+ ## 会话技术：
+	1.会话：一次会话中包含多次请求和响应。
+		* 一次会话：浏览器第一次给服务器资源发送请求，会话建立，直到有一方断开为止。
+	2.功能： 在一次会话的范围内的多次请求间，共享数据
+	3.方式：
+		1.客户端会话技术：Cookie
+		2.服务器端会话技术：Session
+		
+ ##Cookie：
+	1.概念：客户端会话技术，将数据保存到客户端
+		
+	2.快速入门：
+		* 使用步骤：
+			1. 创建Cookie对象，绑定数据
+				* new Cookie(String name,String value);
+			2.发送Cookie对象
+				* response.AddCookie(Cookie cookie);
+			3.获取Cookie对象，拿到数据
+				* Cookie[]  request.getCookies();
+				
+	3.实现原理：
+		* 基于响应头Set-Cookie和请求头Cookie实现
+	
+	4.Cookie的细节
+		1.一次可以发送多个cookie？
+			* 可以
+			* 可以创建多个cookie对象，使用response调用多次addCookie方法发送Cookie即可。
+		2.cookie在浏览器保存多久？
+			1.默认情况下，当浏览器变比后，cookie数据被销毁
+			2.持久化存储：
+				* setMaxAge(int seconds)
+					1. 正数：将cookie数据写到硬盘的文件中。持久化存储。cookie存活时间。
+					2. 负数：默认值
+					3. 零：删除cookie信息
+		3.cookie能不能中文
+			* 在 tomcat 8 之前 cookie中不能直接存储中文数据。
+				* 需要讲中文转码 -- 一般采用URL编码(%E3)
+			* 在 tomcat 8 之后， cookie支持中文数据。	
+		4.cookie共享问题？
+			1.假设在一个tomcat服务器中，部署多个web项目，那么在这些web项目中cookie能不能共享？
+				* 在默认情况下cookie不能共享
+				
+				* setPath(String path)：设置cookie的获取范围，默认情况下，设置当前的虚拟目录
+					* 如果要共享，则可以将path设置为" / "
+					
+			2. 在不同的tomcat服务器间cookie共享问题？
+				* setDomain(String path):如果设置一级域名相同，那么多个服务器之间cookie可以共享
+					* SetDOmain(".baidu.com"),那么tieba.baidu.com和news.baidu.com中的cookie可以共享数据
+		
+		5.cookie的特点和作用
+			1.cookie保存数据在客户端浏览器
+			2.浏览器对于单个cookie 的大小有限制(4KB) 以及对同一个域名下的总cookie数量也有限制(20个)
+			
+			* 作用：
+				1.cookie 一般作用于存储少量的不太敏感的数据
+				2.在不登录的情况下，完成服务器对客户端的身份识别
+				
+		6.案例：记住上次访问时间
+			1.需求：
+				1. 访问一个Servlet，如果是第一次访问，则提示：你好，欢迎你首次访问。
+				2.如果不是第一次访问，则提示：欢迎回来，您上次访问时间为：显示时间字符串
+				
+			2.分析：
+				1.可以采用cookie来完成
+				2.在服务器的servlet判断是否有名为lastTime的cookie
+					1. 有：不是第一次访问
+						1.响应数据：欢迎回来，您上次访问时间为：2020-5-12 12:29:51
+						2.写回cookie：lastTime = 2020-5-12 12:29:57
+						
+					2. 没有：是第一次访问
+						1.响应数据：你好，欢迎你首次访问。
+						2.写回cookie：lastTime= 2020-5-12 12:29:51
+						
+				3.在浏览器上传输中文数据和特殊字符需要进行转码
+					* Class URLEncoder 这是对数据进行转码的类有一个encode方可进行转码
+						* static String encode(String s, String enc) 
+							* 参数 ：
+								* s：是你需要转码的数据 
+								* enc ：是你想转生成什么字符集的 如："utf-8"
+								
+								
+					* Class URLDecoder : 这是一个对数据解码的类，类中有一个	decode方法可对数据进行解码
+						* static String decode(String s, String enc)  
+							* 参数：
+								* s ：你需要进行解码的数据
+								* enc ：你想要用哪个字符集解码 如："utf-8"
+								
+								
+ ## JSP:入门学习
+	1. 概念：
+		 * java servlet pages ： java服务器端页面
+			* 可以理解为：一个特殊的页面，器中既可以指定定义html便器，有可以定义java代码
+			* 用于简化书写！！！
+			
+	2. 原理;
+		* JSP本质上就是一个servlet
+		
+	3.JSP的脚本：JSP定义java代码的方式
+		1.<% 代码 %>：定义的java代码，在service方法中。service方法中可以定义声明，该脚本就可定义什么。
+		2.<%! 代码 %>：定义的java代码，在JSP转换后的java类成员位置。
+		3.<%= 代码 %>：定义的java代码，会输出到页面上。输出语句中可以定义什么，该脚本中中就可以定义什么。
+		
+	4.jsp内置对象:
+		* 在jsp页面中不需要获取和创建，可以直接使用的对象
+		* jsp一共有9个内置对象。
+		* 今天学习3个：
+			* request
+			* response
+			* out： 字符输出流对象。可以将数据输出到页面上。和response.getWriter()类似
+				* response.getWriter()和out.writer()的区别：
+					* 在tomcat服务器真正给客户端做出响应之前，会找response缓冲区数据，在找out缓冲区数据。
+					* response.getWriter()数据永远在out.writer()之前。	
+					
+					
+ ## Session：
+	1. 概念：服务器端会话技术，在一次会话的多次请求共享数据，键数据保存在服务器端的对象中。HttpSession
+	2. 快速入门：
+		1.获取HttpSession对象：
+			* HttpSession session = new HttpSession();
+		2.使用HttpSession对象：
+			* Object getAttribute(String name)  
+			* void setAttribute(String name, Object value)  
+			* void removeAttribute(String name) 
+			
+		3.原理：
+			* Session的实现是依赖于cookie的。
+			
+		4.细节：
+			1. 当客户端关闭后，服务器不关闭，两次获取Session是否同为一个？
+				* 默认情况下。不是。
+				* 如果需要向，则可以创建Cookie，键为“JSESSIONID”,设置最大存活数据，让cookie持久化保存。
+			    	如：Cookie cookie = new Cookie("JSESSIONID",session.getId());
+						cookie.setMaxAge(60*60);
+						response.addCookie(cookie);
+				
+				
+			2. 客户端不关闭，服务器关闭后，两次获取Session是否同为一个？
+				* 不是同一个，但是要确保数据不丢失
+					* session的钝化
+						* 在服务器正常关闭之前，将session对象序列化到硬盘上
+					* session的活化
+						* 在服务器启动后，将session文件转化为内存中的session对象即可。
+			3. Session的失效时间？
+				1. 服务器关闭
+				2. Session对象调用 invalidate() .
+				3. session默认失效时间30分钟
+					选择性配置修改
+					<session-config>
+						<session-timeout>30</session-timeout>
+					</session-config>
+					
+		5. seeion的特点：
+			1. session用于存储一次会话的多次请求的数据，存在服务器端
+			2. session可以存储任意类型，任意大小的数据
+			
+			* session与cookie的区别：
+				1. Seessioncun数据在服务器端，cookie在客户端
+				2 session没有数据大小限制，cookie有
+				3. session数据安全，cookie相对于不安全
+				
+ ## 案例：验证码
+	1.案例需求：
+		1. 访问导游验证码的登录页面login.jsp
+		2. 输入用户名，密码以及验证码。
+			* 如果用户名和密码有误，条状登录页面，提示用户名或密码错误
+			* 如果验证码输入有误，跳转登录页面，提示：雁阵错误
+			* 如果全部输入正确，则跳转到主页success.jsp，显示：用活命，欢迎您。
+			
+	2.案例分析：
+		1. 访问导游验证码的登录页面login.jsp
+			* 页面实现：
+				1.一个用户名输入框
+				2.一个密码输入框
+				3.一个验证码输入框
+				4.一个servlet验证码程序资源图片
+		
+		2. 输入用户名，密码以及验证码。
+			分析：
+				* 当表单第一次提交就会产生一个servlet对象
+					1.在对象值需要获取表单的每一个输入框信息和验证码资源信息
+						1.优先对验证码进行判断，这样可以减少对数据库的开销
+							* 结果为true ：
+								1.调用数据库实体类，和UserDao对象获取数据库信息
+								2.拿到数据在对获取到的参数判断
+									* 结果为true：
+										1.重定向页面，并提示用户登录成功
+										2.把用户信息保存到session对象中
+									* 结果为false：
+										1.资源转发到首页，并提示用户账号或密码错误
+										2.在转发域存储登录失败原因数据
+										
+							*结果为false：
+								1.资源转发到首页，并提示验证码错误
+								2.在转发域存储登录失败原因数据
+					
+					
+					
+				
+				

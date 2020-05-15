@@ -1,0 +1,78 @@
+ ## 今日内容
+ 
+	1.数据库连接池：
+	
+	2.Spring JDBC：JDBC Template
+	
+	
+## 数据库连接池：
+	1. 概念：其实就是一个容器(集合)，存放数据的连接的容器。
+		当系统初始化好后，容器被创建，容器中或申请一些被连接的对象，当用户来访问数据库时，从容器中获取连接对象，用户访问之后，会将对象归还个容器。
+	2. 好处：
+		1.节约资源
+		2.用户访问高效
+	3.实现：
+		1.标准接口：dataSource   java，sql包下的
+			1.方法：
+				* 获取连接：getConnection()
+				* 归还连接：Connection.close。 在没有使用连接池之前close方法是关闭资源，使用连接池close方法是归还资源。
+		
+		2.一般我们不会去实现它，由数据厂商实现
+			1.C3P0：数据库连接池实现技术
+			2.Druid:数据库连接池实现技术，由阿里巴巴提供的。
+			
+			
+	4.c3p0：数据库连接池技术		
+			* 步骤：
+			 1.导入jar包（3个）C3P0\提供实现的java\mysql的
+			 2.定义配置文件：
+				* 名称：c3p0.properties 或者 c3p0_config.xml
+				* 直接将该文件放到src目录下即可
+			 3.创建核心对象、数据库连接池对象 ：ComboPooledDataSource
+			 4.获取连接：getConnection()
+			 
+	5.Druid：数据库连接池技术
+			1. 步骤：
+			 1.导入jar包（2个）Druid\mysql的jar
+			 2.定义配置文件：
+				* 可以设置为任意文件名和可以放在任意文件目录下
+			 3.创建Properyies对象获取文件键数据	
+			 4.创建核心对象、数据库连接池对象 ：DruidDataSourceFactory
+			 5.获取连接：getConnection()
+			 
+			2.定义工具类：
+				1.定义一个类，JDBCutils
+				2.提供静态代码块加载配置文件，初始化连接池对
+				3.提供方法
+					1.获取连接方法：通过数据库连接池获取连接
+					2.释放资源。
+					3.获取连接池的方法。
+					
+ ## Spring JDBC：
+		* Spring框架对JDBC简单封装。提供类一个JDBCTemplate对象简化JDBC的开发。
+		* 步骤：
+			1.导入jar包
+			2.创建JDBCTemplate对象。依赖数据源DataSource
+				*JdbcTemplate template = new JdbcTemplate(JDBCutils.getDataSource());
+			3.调用JdbcTemplate对象中的方法来完成CRUD的操作
+				*update():执行DML语句，增、删、改语句
+				*queryForMap()：查询结果，将结果封装为Map集合
+					* 注意：这个方法这个方法查询的结果集长度只能为一
+				*queryForList()：查询结果，将结果封装为List集合
+					* 注意将每一个结果封装为Map集合，再将Map集合装到List集合中。
+				*query()：查询结果，将结果封装为JavaBean对象
+					*query的参数：RowMapper
+						* 一般我们使用BeanPropertyRowMapper实现类，可以完成数据到JavaBean的自动封装
+						* tem.query(s, new BeanPropertyRowMapper(类.class));
+				*queryObject()：查询结果，将结果封装为对象
+					* 一般用于聚合函数的查询
+			4.练习：
+				* 需求：
+					1.修改一号元素的meroy为10000
+					2.添加一条记录
+					3.删除更改添加的一条记录
+					4.查询ip为以的记录，将其封装为Map集合
+					5.查询所有记录，将其封装为List集合
+					6.查询所有记录，将其封装为List<emp>集合
+					7.查询一共有多少记录
+					
